@@ -1,4 +1,7 @@
+import pdb
+
 from django.db import models
+from django.contrib import admin
 from django.utils import timezone
 
 
@@ -30,3 +33,28 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
         ordering = ["id"]
+
+
+class BaseAdmin(admin.ModelAdmin):
+    exclude = ("is_deleted", "date_deleted", "deleted_by", "created_by", "updated_by")
+
+    def delete_queryset(self, request, queryset):
+        for obj in queryset:
+            obj.date_deleted = timezone.now()
+            obj.is_deleted = True
+            obj.deleted_by = request.user.email
+            obj.delete()
+
+    def delete_model(self, request, queryset):
+        queryset.date_deleted = timezone.now()
+        queryset.is_deleted = True
+        queryset.deleted_by = request.user.email
+        queryset.delete()
+
+    def save_model(self, request, obj, form, change):
+        if obj.id:
+            obj.updated_by = request.user.email
+            obj.save()
+        else:
+            obj.created_by = request.user.email
+            obj.save()

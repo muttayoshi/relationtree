@@ -1,3 +1,5 @@
+import pdb
+
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -86,3 +88,27 @@ class Address(BaseModel):
 
     def __str__(self):
         return f"{self.address}, {self.postal_code if self.postal_code else ''}"
+
+    def clean(self):
+        if self.sub_district and self.district is None:
+            self.district = self.sub_district.district
+        elif self.sub_district.district != self.district:
+            raise ValidationError("Pemilihan district dan sub district tidak sesuai.")
+
+        if self.district and self.city is None:
+            self.city = self.district.city
+        elif self.district.city != self.city:
+            raise ValidationError("Pemilihan city dan district tidak sesuai.")
+
+        if self.city and self.province is None:
+            self.province = self.city.province
+        elif self.city.province != self.province:
+            raise ValidationError("Pemilihan province dan city tidak sesuai.")
+
+        if self.province and self.country is None:
+            self.country = self.province.country
+        elif self.province.country != self.country:
+            raise ValidationError("Pemilihan country dan province tidak sesuai.")
+
+
+
