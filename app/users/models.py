@@ -61,16 +61,16 @@ class Person(BaseModel):
     # information relevant to their own relationships.
     user = models.OneToOneField(User, models.SET_NULL, blank=True, null=True)
 
-    # def name(self, use_middle_names=True, use_maiden_name=False):
-    #     """Returns the full name of this person."""
-    #     name = ' '.join([self.forename, self.middle_names]) if use_middle_names and self.middle_names else self.forename
-    #     if self.known_as:
-    #         name = name + ' "{0}"'.format(self.known_as)
-    #     if self.maiden_name != '':
-    #         return name + ' ' + (
-    #             self.maiden_name if use_maiden_name else self.surname.upper() + u' (n\xe9e ' + self.maiden_name + ')')
-    #     else:
-    #         return name + ' ' + self.surname.upper()
+    def name(self, use_middle_names=True, use_maiden_name=False):
+        """Returns the full name of this person."""
+        name = ' '.join([self.forename, self.middle_names]) if use_middle_names and self.middle_names else self.forename
+        if self.known_as:
+            name = name + ' "{0}"'.format(self.known_as)
+        if self.maiden_name != '':
+            return name + ' ' + (
+                self.maiden_name if use_maiden_name else self.surname.upper() + u' (n\xe9e ' + self.maiden_name + ')')
+        else:
+            return name + ' ' + self.surname.upper()
     #
     # def given_names(self):
     #     return " ".join([self.forename, self.middle_names]) if self.middle_names else self.forename
@@ -90,50 +90,50 @@ class Person(BaseModel):
     # def date_of_death(self):
     #     return self.death.date if self.death else None
     #
-    # def age(self):
-    #     """Calculate the person's age in years."""
-    #     if not self.date_of_birth() or (self.deceased and not self.date_of_death()):
-    #         return None
-    #     end = self.date_of_death() if self.deceased else date.today()
-    #     years = end.year - self.date_of_birth().year
-    #     if end.month and self.date_of_birth().month:
-    #         if end.month < self.date_of_birth().month or \
-    #                 (end.month == self.date_of_birth().month and
-    #                  end.day and
-    #                  self.date_of_birth().day and
-    #                  end.day < self.date_of_birth().day):
-    #             years -= 1
-    #     return years
+    def age(self):
+        """Calculate the person's age in years."""
+        if not self.date_of_birth() or (self.deceased and not self.date_of_death()):
+            return None
+        end = self.date_of_death() if self.deceased else date.today()
+        years = end.year - self.date_of_birth().year
+        if end.month and self.date_of_birth().month:
+            if end.month < self.date_of_birth().month or \
+                    (end.month == self.date_of_birth().month and
+                     end.day and
+                     self.date_of_birth().day and
+                     end.day < self.date_of_birth().day):
+                years -= 1
+        return years
     #
-    # def is_age_exact(self):
-    #     """If the date of birth and/or date of death isn't known precisely then
-    #     the age might be off by up to a year."""
-    #     if self.date_of_birth() is None or self.date_of_birth().is_uncertain():
-    #         return False
-    #     if self.deceased and (self.date_of_death() is None or self.date_of_death().is_uncertain()):
-    #         return False
-    #     return True
+    def is_age_exact(self):
+        """If the date of birth and/or date of death isn't known precisely then
+        the age might be off by up to a year."""
+        if self.date_of_birth() is None or self.date_of_birth().is_uncertain():
+            return False
+        if self.deceased and (self.date_of_death() is None or self.date_of_death().is_uncertain()):
+            return False
+        return True
     #
-    # def year_range(self):
-    #     return '{0}-{1}'.format(self.date_of_birth().year if self.date_of_birth() else '????',
-    #                             '' if not self.deceased else self.date_of_death().year if self.date_of_death() else '????')
+    def year_range(self):
+        return '{0}-{1}'.format(self.date_of_birth().year if self.date_of_birth() else '????',
+                                '' if not self.deceased else self.date_of_death().year if self.date_of_death() else '????')
     #
-    # def spouses(self):
-    #     """Return a list of anybody that this person is or was married to."""
-    #     if self.gender == 'F':
-    #         return [(m.husband, m.date, m.location, m.divorced) for m in self.wife_of.order_by('date').all()]
-    #     else:
-    #         return [(m.wife, m.date, m.location, m.divorced) for m in self.husband_of.order_by('date').all()]
+    def spouses(self):
+        """Return a list of anybody that this person is or was married to."""
+        if self.gender == 'F':
+            return [(m.husband, m.date, m.location, m.divorced) for m in self.wife_of.order_by('date').all()]
+        else:
+            return [(m.wife, m.date, m.location, m.divorced) for m in self.husband_of.order_by('date').all()]
     #
-    # def full_siblings(self):
-    #     """Returns a list of this person's brothers and sisters, excluding
-    #     half-siblings. Siblings are assumed to be full siblings if only one
-    #     parent is known."""
-    #     return Person.objects.filter(
-    #         ~Q(id=self.pk),
-    #         Q(~Q(father=None), father=self.father, mother=self.mother) | \
-    #         Q(~Q(mother=None), mother=self.mother, father=self.father)
-    #     ).order_by('birth__date')
+    def full_siblings(self):
+        """Returns a list of this person's brothers and sisters, excluding
+        half-siblings. Siblings are assumed to be full siblings if only one
+        parent is known."""
+        return Person.objects.filter(
+            ~Q(id=self.pk),
+            Q(~Q(father=None), father=self.father, mother=self.mother) | \
+            Q(~Q(mother=None), mother=self.mother, father=self.father)
+        ).order_by('birth__date')
     #
     # def half_siblings(self):
     #     """Returns a list of this person's half-brothers and half-sisters."""
@@ -143,10 +143,10 @@ class Person(BaseModel):
     #         Q(~Q(mother=None), ~Q(father=self.father), mother=self.mother)
     #     ).order_by('birth__date')
     #
-    # def children(self):
-    #     """Returns a list of this person's children."""
-    #     offspring = self.children_of_mother if self.gender == 'F' else self.children_of_father
-    #     return offspring.select_related('birth', 'death').order_by('birth__date')
+    def children(self):
+        """Returns a list of this person's children."""
+        offspring = self.children_of_mother if self.gender == 'F' else self.children_of_father
+        return offspring.select_related('birth', 'death').order_by('birth__date')
     #
     # def marriages(self):
     #     return self.husband_of.all() if self.gender == 'M' else self.wife_of.all()
@@ -297,9 +297,9 @@ class Person(BaseModel):
     #
     #     return (root, ancestors, relative_ancestors)
     #
-    # def photos(self):
-    #     '''Returns a list of all photos associated with this person.'''
-    #     return Photograph.objects.filter(person=self)
+    def photos(self):
+        '''Returns a list of all photos associated with this person.'''
+        return Photograph.objects.filter(person=self)
     #
     # def sorted_tags(self):
     #     '''Returns a list of tags sorted alphabetically.'''
@@ -309,24 +309,24 @@ class Person(BaseModel):
     #     return self.gender == 'F' and self.wife_of.filter(divorced=False).count() > 0 and (
     #             self.maiden_name == '' or self.maiden_name == None)
     #
-    # def clean(self):
-    #     if self.date_of_death() and not self.deceased:
-    #         raise ValidationError('Cannot specify date of death for living person.')
-    #     if self.birth and self.birth.person.id != self.id:
-    #         raise ValidationError('Birth event must refer back to the same person.')
-    #     if self.death and self.death.person.id != self.id:
-    #         raise ValidationError('Death event must refer back to the same person.')
-    #     if (self.mother and self.mother == self) or (self.father and self.father == self):
-    #         raise ValidationError('Person cannot be their own parent.')
+    def clean(self):
+        if self.date_of_death() and not self.deceased:
+            raise ValidationError('Cannot specify date of death for living person.')
+        if self.birth and self.birth.person.id != self.id:
+            raise ValidationError('Birth event must refer back to the same person.')
+        if self.death and self.death.person.id != self.id:
+            raise ValidationError('Death event must refer back to the same person.')
+        if (self.mother and self.mother == self) or (self.father and self.father == self):
+            raise ValidationError('Person cannot be their own parent.')
     #
-    # def get_absolute_url(self):
-    #     return reverse('person', args=[self.id])
-    #
-    # def __str__(self):
-    #     return self.name()
-    #
-    # def __repr__(self):
-    #     return self.name()
+    def get_absolute_url(self):
+        return reverse('person', args=[self.id])
+
+    def __str__(self):
+        return self.name()
+
+    def __repr__(self):
+        return self.name()
 
     class Meta:
         ordering = ['surname', 'forename', 'middle_names', '-birth__date']
@@ -346,7 +346,7 @@ class Event(BaseModel):
     event_type = models.PositiveSmallIntegerField(choices=EVENT_TYPE)
     date = UncertainDateField()
     location = models.ForeignKey(
-        app.locations.models.Location,
+        "locations.Address",
         models.SET_NULL,
         blank=True,
         null=True,
@@ -396,7 +396,7 @@ class Marriage(BaseModel):
     )
     date = UncertainDateField(blank=True, null=True)
     location = models.ForeignKey(
-        app.locations.models.Location,
+        "locations.Address",
         models.SET_NULL,
         blank=True,
         null=True,
@@ -423,7 +423,7 @@ class Photograph(BaseModel):
     caption = models.TextField(blank=True)
     date = UncertainDateField(blank=True, null=True)
     location = models.ForeignKey(
-        app.locations.models.Location,
+        "locations.Address",
         models.SET_NULL,
         blank=True,
         null=True,
