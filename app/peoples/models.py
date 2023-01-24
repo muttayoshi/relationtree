@@ -35,7 +35,7 @@ class Person(BaseModel):
         on_delete=models.DO_NOTHING,
         null=True,
         blank=True,
-        verbose_name="Tempat Lahir",
+        verbose_name="Tempat Tinggal",
     )
     phone = models.CharField(max_length=15, null=True, blank=True, help_text="6281234567890")
     date_of_death = UncertainDateField(help_text="YYYY-MM-DD", blank=True, null=True)
@@ -119,12 +119,6 @@ class Person(BaseModel):
             ~Q(id=self.pk),
             Q(~Q(parent=None), parent__husband=self.parent.husband, parent__wife=self.parent.wife),
         ).order_by('date_of_birth')
-
-    def children(self):
-        """Returns a list of this person's children."""
-        # offspring = self.children_of_mother if self.gender == 'F' else self.children_of_father
-        # return offspring.select_related('date_of_birth', 'date_of_death').order_by('date_of_birth')
-        return None
 
     def photos(self):
         """Returns a list of all photos associated with this person."""
