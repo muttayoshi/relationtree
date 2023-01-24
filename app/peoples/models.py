@@ -50,7 +50,7 @@ class Person(BaseModel):
     user = models.OneToOneField(User, models.SET_NULL, blank=True, null=True)
 
     class Meta:
-        ordering = ['surname', '-birth__date']
+        ordering = ['surname', '-date_of_birth']
 
     def name(self, use_surname=False, use_nickname=False):
         name = self.full_name.title()
@@ -159,7 +159,7 @@ class Marriage(BaseModel):
         limit_choices_to={'gender': 'F'},
         related_name='wife_of'
     )
-    date = UncertainDateField(blank=True, null=True)
+    date = UncertainDateField(blank=True, null=True, help_text="YYYY-MM-DD")
     location = models.ForeignKey(
         "locations.Address",
         models.SET_NULL,
@@ -178,6 +178,10 @@ class Marriage(BaseModel):
 
     def __str__(self):
         return self.husband.name(use_surname=True, use_nickname=False) + ' & ' + self.wife.name(use_surname=False, use_nickname=False)
+
+    def children(self):
+        """Returns a list of this person's children."""
+        return Person.objects.filter(parent=self).all()
 
 
 class Photograph(BaseModel):
